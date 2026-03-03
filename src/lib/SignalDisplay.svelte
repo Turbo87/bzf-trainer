@@ -68,7 +68,7 @@
 	}
 
 	.light.white {
-		background: #e8e8e8;
+		background: #ffffff;
 		box-shadow:
 			0 0 30px #ffffff,
 			0 0 60px #ffffffaa,
@@ -129,11 +129,6 @@
 	.spark.red {
 		background: #ef4444;
 		box-shadow: 0 0 8px #ef4444;
-	}
-
-	.spark.white {
-		background: #e8e8e8;
-		box-shadow: 0 0 8px #ffffff;
 	}
 
 	.spark.green {
