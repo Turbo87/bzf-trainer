@@ -8,13 +8,15 @@ const ALL_MEANINGS = SIGNALS.map((s) => s.meaning);
 const ALL_LABELS = [...new Set(SIGNALS.map((s) => s.label))];
 
 describe('/+page.svelte', () => {
-	it('shows a signal label and situation', async () => {
+	it('shows a signal label or meaning as heading', async () => {
 		render(Page);
 
 		let heading = page.getByRole('heading', { level: 1 });
 		await expect.element(heading).toBeInTheDocument();
 		let headingText = heading.element().textContent!;
-		expect(ALL_LABELS.some((label) => headingText.includes(label))).toBe(true);
+		let isLabel = ALL_LABELS.some((label) => headingText.includes(label));
+		let isMeaning = ALL_MEANINGS.some((meaning) => headingText.includes(meaning));
+		expect(isLabel || isMeaning).toBe(true);
 	});
 
 	it('shows the situation context', async () => {
@@ -35,14 +37,18 @@ describe('/+page.svelte', () => {
 		expect(allButtons).toHaveLength(4);
 	});
 
-	it('answer buttons contain valid meanings', async () => {
-		render(Page);
+	it('answer buttons never show [object Object]', async () => {
+		for (let i = 0; i < 10; i++) {
+			let { unmount } = render(Page);
 
-		let buttons = page.getByRole('button');
-		await expect.element(buttons.first()).toBeInTheDocument();
-		let allButtons = await buttons.elements();
-		for (let button of allButtons) {
-			expect(ALL_MEANINGS).toContain(button.textContent!.trim());
+			let buttons = page.getByRole('button');
+			await expect.element(buttons.first()).toBeInTheDocument();
+			let allButtons = await buttons.elements();
+			for (let button of allButtons) {
+				expect(button.textContent).not.toContain('[object Object]');
+			}
+
+			unmount();
 		}
 	});
 

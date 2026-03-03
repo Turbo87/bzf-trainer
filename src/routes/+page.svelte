@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { generateQuestion, type Question } from '$lib/quiz';
 	import SignalDisplay from '$lib/SignalDisplay.svelte';
+	import type { Signal } from '$lib/signals';
 
 	let question: Question = $state(generateQuestion());
-	let selectedAnswer: string | null = $state(null);
+	let selectedAnswer: Signal | string | null = $state(null);
 
-	function select(answer: string) {
+	function select(answer: Signal | string) {
 		selectedAnswer = answer;
 	}
 
@@ -14,7 +15,16 @@
 		selectedAnswer = null;
 	}
 
-	let isCorrect = $derived(selectedAnswer === question.signal.meaning);
+	function checkAnswer(): boolean {
+		if (selectedAnswer === null) return false;
+		if (question.mode === 'signal-to-meaning') {
+			return selectedAnswer === question.signal.meaning;
+		}
+		return typeof selectedAnswer === 'object' && selectedAnswer.label === question.signal.label;
+	}
+
+	let isCorrect = $derived(checkAnswer());
+
 	let situationLabel = $derived(question.signal.situation === 'flight' ? 'Im Flug' : 'Am Boden');
 	let situationIcon = $derived(question.signal.situation === 'flight' ? '✈' : '🛞');
 </script>
@@ -24,15 +34,27 @@
 		>{situationIcon} {situationLabel}</span
 	>
 
-	<SignalDisplay signal={question.signal} />
-
-	<h1>{question.signal.label}</h1>
+	{#if question.mode === 'signal-to-meaning'}
+		<SignalDisplay signal={question.signal} />
+		<h1>{question.signal.label}</h1>
+	{:else}
+		<h1>{question.signal.meaning}</h1>
+	{/if}
 
 	{#if selectedAnswer === null}
 		<div class="answers">
-			{#each question.answers as answer}
-				<button class="answer-btn" onclick={() => select(answer)}>{answer}</button>
-			{/each}
+			{#if question.mode === 'signal-to-meaning'}
+				{#each question.answers as answer}
+					<button class="answer-btn" onclick={() => select(answer)}>{answer}</button>
+				{/each}
+			{:else}
+				{#each question.answers as answer}
+					<button class="answer-btn signal-btn" onclick={() => select(answer)}>
+						<SignalDisplay signal={answer} size="small" />
+						<span>{answer.label}</span>
+					</button>
+				{/each}
+			{/if}
 		</div>
 	{:else}
 		<div class="result {isCorrect ? 'correct' : 'wrong'}" data-testid="result">
@@ -40,7 +62,11 @@
 				<p>Richtig!</p>
 			{:else}
 				<p>Falsch! Die richtige Antwort ist:</p>
-				<p><strong>{question.signal.meaning}</strong></p>
+				{#if question.mode === 'signal-to-meaning'}
+					<p><strong>{question.signal.meaning}</strong></p>
+				{:else}
+					<p><strong>{question.signal.label}</strong></p>
+				{/if}
 			{/if}
 		</div>
 		<button class="next-btn" onclick={next}>Weiter</button>
@@ -118,6 +144,13 @@
 	.answer-btn:hover {
 		background: #334155;
 		border-color: #475569;
+	}
+
+	.signal-btn {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 0.75rem 1.25rem;
 	}
 
 	.result {

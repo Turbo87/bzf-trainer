@@ -1,18 +1,38 @@
 import { type Signal, SIGNALS, signalsForSituation } from './signals';
 
-export interface Question {
+export interface SignalToMeaning {
+	mode: 'signal-to-meaning';
 	signal: Signal;
 	answers: string[];
 }
 
+export interface MeaningToSignal {
+	mode: 'meaning-to-signal';
+	signal: Signal;
+	answers: Signal[];
+}
+
+export type Question = SignalToMeaning | MeaningToSignal;
+
 export function generateQuestion(): Question {
 	let signal = pickRandom(SIGNALS);
-
 	let others = signalsForSituation(signal.situation).filter((s) => s !== signal);
-	let wrongAnswers = shuffle(others).slice(0, 3).map((s) => s.meaning);
-	let answers = shuffle([signal.meaning, ...wrongAnswers]);
 
-	return { signal, answers };
+	if (Math.random() < 0.5) {
+		let wrongAnswers = shuffle(others).slice(0, 3).map((s) => s.meaning);
+		return {
+			mode: 'signal-to-meaning',
+			signal,
+			answers: shuffle([signal.meaning, ...wrongAnswers]),
+		};
+	} else {
+		let wrongSignals = shuffle(others).slice(0, 3);
+		return {
+			mode: 'meaning-to-signal',
+			signal,
+			answers: shuffle([signal, ...wrongSignals]),
+		};
+	}
 }
 
 function pickRandom<T>(array: T[]): T {
