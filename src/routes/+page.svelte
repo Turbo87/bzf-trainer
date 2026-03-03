@@ -5,9 +5,16 @@
 
 	let question: Question = $state(generateQuestion());
 	let selectedAnswer: Signal | string | null = $state(null);
+	let correct: number = $state(0);
+	let incorrect: number = $state(0);
 
 	function select(answer: Signal | string) {
 		selectedAnswer = answer;
+		if (checkAnswer()) {
+			correct++;
+		} else {
+			incorrect++;
+		}
 	}
 
 	function next() {
@@ -30,6 +37,11 @@
 </script>
 
 <div class="quiz">
+	<div class="score">
+		<span class="score-correct">✓ <span data-testid="score-correct">{correct}</span></span>
+		<span class="score-incorrect">✗ <span data-testid="score-incorrect">{incorrect}</span></span>
+	</div>
+
 	<span class="situation-badge {question.signal.situation}" data-testid="situation"
 		>{situationIcon} {situationLabel}</span
 	>
@@ -90,6 +102,22 @@
 		padding: 2rem 1rem;
 		max-width: 36rem;
 		margin: 0 auto;
+	}
+
+	.score {
+		display: flex;
+		gap: 1.5rem;
+		font-size: 1.125rem;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.score-correct {
+		color: #4ade80;
+	}
+
+	.score-incorrect {
+		color: #f87171;
 	}
 
 	.situation-badge {

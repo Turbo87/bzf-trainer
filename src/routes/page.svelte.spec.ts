@@ -74,6 +74,63 @@ describe('/+page.svelte', () => {
 		await expect.element(weiterButton).toBeInTheDocument();
 	});
 
+	it('shows score counter starting at 0/0', async () => {
+		render(Page);
+
+		let correct = page.getByTestId('score-correct');
+		let incorrect = page.getByTestId('score-incorrect');
+		await expect.element(correct).toBeInTheDocument();
+		await expect.element(incorrect).toBeInTheDocument();
+		expect(correct.element().textContent).toBe('0');
+		expect(incorrect.element().textContent).toBe('0');
+	});
+
+	it('increments score after answering', async () => {
+		render(Page);
+
+		let firstButton = page.getByRole('button').first();
+		await expect.element(firstButton).toBeInTheDocument();
+		await firstButton.click();
+
+		let result = page.getByTestId('result');
+		await expect.element(result).toBeInTheDocument();
+		let wasCorrect = result.element().textContent!.includes('Richtig');
+
+		let correct = page.getByTestId('score-correct');
+		let incorrect = page.getByTestId('score-incorrect');
+		if (wasCorrect) {
+			expect(correct.element().textContent).toBe('1');
+			expect(incorrect.element().textContent).toBe('0');
+		} else {
+			expect(correct.element().textContent).toBe('0');
+			expect(incorrect.element().textContent).toBe('1');
+		}
+	});
+
+	it('accumulates score across multiple questions', async () => {
+		render(Page);
+
+		// Answer first question
+		let firstButton = page.getByRole('button').first();
+		await expect.element(firstButton).toBeInTheDocument();
+		await firstButton.click();
+
+		let weiterButton = page.getByRole('button', { name: 'Weiter' });
+		await expect.element(weiterButton).toBeInTheDocument();
+		await weiterButton.click();
+
+		// Answer second question
+		let nextButton = page.getByRole('button').first();
+		await expect.element(nextButton).toBeInTheDocument();
+		await nextButton.click();
+
+		let correct = page.getByTestId('score-correct');
+		let incorrect = page.getByTestId('score-incorrect');
+		let correctCount = Number(correct.element().textContent);
+		let incorrectCount = Number(incorrect.element().textContent);
+		expect(correctCount + incorrectCount).toBe(2);
+	});
+
 	it('shows a new question after clicking "Weiter"', async () => {
 		render(Page);
 
