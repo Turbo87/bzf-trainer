@@ -15,10 +15,13 @@
 
 	let isCorrect = $derived(selectedAnswer === question.signal.meaning);
 	let situationLabel = $derived(question.signal.situation === 'flight' ? 'Im Flug' : 'Am Boden');
+	let situationIcon = $derived(question.signal.situation === 'flight' ? '✈' : '🛞');
 </script>
 
 <div class="quiz">
-	<span class="situation-badge" data-testid="situation">{situationLabel}</span>
+	<span class="situation-badge {question.signal.situation}" data-testid="situation"
+		>{situationIcon} {situationLabel}</span
+	>
 
 	<div
 		class="light {question.signal.color} {question.signal.pattern}"
@@ -67,14 +70,24 @@
 	}
 
 	.situation-badge {
-		font-size: 0.875rem;
-		font-weight: 600;
+		font-size: 1.125rem;
+		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		padding: 0.25rem 1rem;
+		letter-spacing: 0.08em;
+		padding: 0.5rem 1.25rem;
 		border-radius: 999px;
-		border: 1px solid #334155;
-		color: #94a3b8;
+	}
+
+	.situation-badge.flight {
+		background: #0c4a6e;
+		color: #7dd3fc;
+		border: 1px solid #0369a1;
+	}
+
+	.situation-badge.ground {
+		background: #451a03;
+		color: #fdba74;
+		border: 1px solid #c2410c;
 	}
 
 	.light {

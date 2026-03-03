@@ -23,7 +23,7 @@ describe('/+page.svelte', () => {
 		let situationEl = page.getByTestId('situation');
 		await expect.element(situationEl).toBeInTheDocument();
 		let text = situationEl.element().textContent!;
-		expect(text === 'Im Flug' || text === 'Am Boden').toBe(true);
+		expect(text.includes('Im Flug') || text.includes('Am Boden')).toBe(true);
 	});
 
 	it('shows 4 answer buttons', async () => {
