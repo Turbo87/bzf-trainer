@@ -41,13 +41,21 @@
 		if (question.mode === 'signal-to-meaning') {
 			return selectedAnswer === question.signal.meaning;
 		}
+		if (question.mode === 'confirmation') {
+			return selectedAnswer === question.confirmation.correctAnswer;
+		}
 		return typeof selectedAnswer === 'object' && selectedAnswer.label === question.signal.label;
 	}
 
 	let isCorrect = $derived(checkAnswer());
 
-	let situationLabel = $derived(question.signal.situation === 'flight' ? 'Im Flug' : 'Am Boden');
-	let situationIcon = $derived(question.signal.situation === 'flight' ? '✈' : '🛞');
+	let situation = $derived(
+		question.mode === 'confirmation'
+			? question.confirmation.situation
+			: question.signal.situation,
+	);
+	let situationLabel = $derived(situation === 'flight' ? 'Im Flug' : 'Am Boden');
+	let situationIcon = $derived(situation === 'flight' ? '✈' : '🛞');
 </script>
 
 <div class="quiz">
@@ -57,29 +65,31 @@
 		<span class="score-highscore">★ <span data-testid="highscore">{highscore}</span></span>
 	</div>
 
-	<span class="situation-badge {question.signal.situation}" data-testid="situation"
+	<span class="situation-badge {situation}" data-testid="situation"
 		>{situationIcon} {situationLabel}</span
 	>
 
 	{#if question.mode === 'signal-to-meaning'}
 		<SignalDisplay signal={question.signal} />
 		<h1>{question.signal.label}</h1>
+	{:else if question.mode === 'confirmation'}
+		<h1>{question.confirmation.question}</h1>
 	{:else}
 		<h1>{question.signal.meaning}</h1>
 	{/if}
 
 	{#if selectedAnswer === null}
 		<div class="answers">
-			{#if question.mode === 'signal-to-meaning'}
-				{#each question.answers as answer}
-					<button class="answer-btn" onclick={() => select(answer)}>{answer}</button>
-				{/each}
-			{:else}
+			{#if question.mode === 'meaning-to-signal'}
 				{#each question.answers as answer}
 					<button class="answer-btn signal-btn" onclick={() => select(answer)}>
 						<SignalDisplay signal={answer} size="small" />
 						<span>{answer.label}</span>
 					</button>
+				{/each}
+			{:else}
+				{#each question.answers as answer}
+					<button class="answer-btn" onclick={() => select(answer)}>{answer}</button>
 				{/each}
 			{/if}
 		</div>
@@ -91,6 +101,8 @@
 				<p>Falsch! Die richtige Antwort ist:</p>
 				{#if question.mode === 'signal-to-meaning'}
 					<p><strong>{question.signal.meaning}</strong></p>
+				{:else if question.mode === 'confirmation'}
+					<p><strong>{question.confirmation.correctAnswer}</strong></p>
 				{:else}
 					<p><strong>{question.signal.label}</strong></p>
 				{/if}

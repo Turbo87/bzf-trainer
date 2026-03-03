@@ -2,17 +2,19 @@ import { page } from 'vitest/browser';
 import { afterEach, describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import Page from './+page.svelte';
+import { CONFIRMATIONS } from '$lib/confirmations';
 import { SIGNALS } from '$lib/signals';
 
 const ALL_MEANINGS = SIGNALS.map((s) => s.meaning);
 const ALL_LABELS = [...new Set(SIGNALS.map((s) => s.label))];
+const ALL_CONFIRMATION_QUESTIONS = CONFIRMATIONS.map((c) => c.question);
 
 describe('/+page.svelte', () => {
 	afterEach(() => {
 		document.cookie = 'highscore=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 	});
 
-	it('shows a signal label or meaning as heading', async () => {
+	it('shows a signal label, meaning, or confirmation question as heading', async () => {
 		render(Page);
 
 		let heading = page.getByRole('heading', { level: 1 });
@@ -20,7 +22,8 @@ describe('/+page.svelte', () => {
 		let headingText = heading.element().textContent!;
 		let isLabel = ALL_LABELS.some((label) => headingText.includes(label));
 		let isMeaning = ALL_MEANINGS.some((meaning) => headingText.includes(meaning));
-		expect(isLabel || isMeaning).toBe(true);
+		let isConfirmation = ALL_CONFIRMATION_QUESTIONS.some((q) => headingText.includes(q));
+		expect(isLabel || isMeaning || isConfirmation).toBe(true);
 	});
 
 	it('shows the situation context', async () => {

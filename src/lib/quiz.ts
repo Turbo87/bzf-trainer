@@ -1,3 +1,4 @@
+import { type Confirmation, CONFIRMATIONS } from './confirmations';
 import { type Signal, SIGNALS, signalsForSituation } from './signals';
 
 export interface SignalToMeaning {
@@ -12,13 +13,30 @@ export interface MeaningToSignal {
 	answers: Signal[];
 }
 
-export type Question = SignalToMeaning | MeaningToSignal;
+export interface ConfirmationQuestion {
+	mode: 'confirmation';
+	confirmation: Confirmation;
+	answers: string[];
+}
+
+export type Question = SignalToMeaning | MeaningToSignal | ConfirmationQuestion;
 
 export function generateQuestion(): Question {
+	let roll = Math.random();
+
+	if (roll < 0.33) {
+		let confirmation = pickRandom(CONFIRMATIONS);
+		return {
+			mode: 'confirmation',
+			confirmation,
+			answers: shuffle([confirmation.correctAnswer, ...confirmation.wrongAnswers]),
+		};
+	}
+
 	let signal = pickRandom(SIGNALS);
 	let others = signalsForSituation(signal.situation).filter((s) => s !== signal);
 
-	if (Math.random() < 0.5) {
+	if (roll < 0.66) {
 		let wrongAnswers = shuffle(others).slice(0, 3).map((s) => s.meaning);
 		return {
 			mode: 'signal-to-meaning',
