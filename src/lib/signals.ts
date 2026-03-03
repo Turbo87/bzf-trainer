@@ -2,17 +2,29 @@ export type Situation = 'flight' | 'ground';
 export type Color = 'green' | 'red' | 'white';
 export type Pattern = 'steady' | 'blinking';
 
-export interface Signal {
+interface BaseSignal {
 	situation: Situation;
-	color: Color;
-	pattern: Pattern;
 	label: string;
 	meaning: string;
 }
 
+export interface LightSignal extends BaseSignal {
+	type: 'light';
+	color: Color;
+	pattern: Pattern;
+}
+
+export interface PyrotechnicSignal extends BaseSignal {
+	type: 'pyrotechnic';
+	colors: Color[];
+}
+
+export type Signal = LightSignal | PyrotechnicSignal;
+
 export const SIGNALS: Signal[] = [
 	// Signale an Luftfahrzeuge im Flug
 	{
+		type: 'light',
 		situation: 'flight',
 		color: 'green',
 		pattern: 'steady',
@@ -20,6 +32,7 @@ export const SIGNALS: Signal[] = [
 		meaning: 'Landung frei',
 	},
 	{
+		type: 'light',
 		situation: 'flight',
 		color: 'green',
 		pattern: 'blinking',
@@ -27,6 +40,7 @@ export const SIGNALS: Signal[] = [
 		meaning: 'Anflug fortsetzen (Rückkehr zur Landung)',
 	},
 	{
+		type: 'light',
 		situation: 'flight',
 		color: 'red',
 		pattern: 'steady',
@@ -34,6 +48,7 @@ export const SIGNALS: Signal[] = [
 		meaning: 'Anderes Luftfahrzeug hat Vorrang – Platzrunde fortsetzen',
 	},
 	{
+		type: 'light',
 		situation: 'flight',
 		color: 'red',
 		pattern: 'blinking',
@@ -41,15 +56,31 @@ export const SIGNALS: Signal[] = [
 		meaning: 'Nicht landen!',
 	},
 	{
+		type: 'light',
 		situation: 'flight',
 		color: 'white',
 		pattern: 'blinking',
 		label: 'Weißes Blinklicht',
 		meaning: 'Auf diesem Flugplatz landen',
 	},
+	{
+		type: 'pyrotechnic',
+		situation: 'flight',
+		colors: ['red'],
+		label: 'Rote Feuerwerkskörper',
+		meaning: 'Ungeachtet aller früheren Anweisungen und Freigaben zur Zeit nicht landen',
+	},
+	{
+		type: 'pyrotechnic',
+		situation: 'flight',
+		colors: ['red', 'green'],
+		label: 'Leuchtgeschosse (rot und grün)',
+		meaning: 'Warnung! Einflug in Sperrgebiet oder Gefahrengebiet',
+	},
 
 	// Signale an Luftfahrzeuge am Boden
 	{
+		type: 'light',
 		situation: 'ground',
 		color: 'green',
 		pattern: 'steady',
@@ -57,6 +88,7 @@ export const SIGNALS: Signal[] = [
 		meaning: 'Start frei',
 	},
 	{
+		type: 'light',
 		situation: 'ground',
 		color: 'green',
 		pattern: 'blinking',
@@ -64,6 +96,7 @@ export const SIGNALS: Signal[] = [
 		meaning: 'Rollen frei (Piste überqueren)',
 	},
 	{
+		type: 'light',
 		situation: 'ground',
 		color: 'red',
 		pattern: 'steady',
@@ -71,6 +104,7 @@ export const SIGNALS: Signal[] = [
 		meaning: 'Halt',
 	},
 	{
+		type: 'light',
 		situation: 'ground',
 		color: 'red',
 		pattern: 'blinking',
@@ -78,6 +112,7 @@ export const SIGNALS: Signal[] = [
 		meaning: 'Rollhalt – Piste / Rollweg frei machen',
 	},
 	{
+		type: 'light',
 		situation: 'ground',
 		color: 'white',
 		pattern: 'blinking',

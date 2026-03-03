@@ -52,4 +52,14 @@ describe('generateQuestion', () => {
 		}
 		expect(labels.size).toBeGreaterThan(3);
 	});
+
+	it('includes pyrotechnic signals', () => {
+		const types = new Set<string>();
+		for (let i = 0; i < 200; i++) {
+			const question = generateQuestion();
+			types.add(question.signal.type);
+		}
+		expect(types.has('pyrotechnic')).toBe(true);
+		expect(types.has('light')).toBe(true);
+	});
 });

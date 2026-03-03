@@ -23,11 +23,20 @@
 		>{situationIcon} {situationLabel}</span
 	>
 
-	<div
-		class="light {question.signal.color} {question.signal.pattern}"
-		role="img"
-		aria-label={question.signal.label}
-	></div>
+	{#if question.signal.type === 'light'}
+		<div
+			class="light {question.signal.color} {question.signal.pattern}"
+			role="img"
+			aria-label={question.signal.label}
+		></div>
+	{:else}
+		{@const colors = question.signal.colors}
+		<div class="pyro" role="img" aria-label={question.signal.label}>
+			{#each { length: 6 } as _, i}
+				<span class="spark {colors[i % colors.length]}" class:delay-1={i % 3 === 1} class:delay-2={i % 3 === 2}></span>
+			{/each}
+		</div>
+	{/if}
 
 	<h1>{question.signal.label}</h1>
 
@@ -132,6 +141,98 @@
 		}
 		50% {
 			opacity: 0.05;
+		}
+	}
+
+	.pyro {
+		width: 8rem;
+		height: 8rem;
+		margin: 1rem 0;
+		position: relative;
+	}
+
+	.spark {
+		position: absolute;
+		width: 0.75rem;
+		height: 0.75rem;
+		border-radius: 50%;
+		animation: burst 1.4s ease-out infinite;
+	}
+
+	.spark.red {
+		background: #ef4444;
+		box-shadow: 0 0 8px #ef4444;
+	}
+
+	.spark.white {
+		background: #e8e8e8;
+		box-shadow: 0 0 8px #ffffff;
+	}
+
+	.spark.green {
+		background: #22c55e;
+		box-shadow: 0 0 8px #22c55e;
+	}
+
+	.spark:nth-child(1) {
+		top: 50%;
+		left: 50%;
+		--dx: -3rem;
+		--dy: -3.5rem;
+	}
+	.spark:nth-child(2) {
+		top: 50%;
+		left: 50%;
+		--dx: 3.2rem;
+		--dy: -2rem;
+	}
+	.spark:nth-child(3) {
+		top: 50%;
+		left: 50%;
+		--dx: -1rem;
+		--dy: 3.5rem;
+	}
+	.spark:nth-child(4) {
+		top: 50%;
+		left: 50%;
+		--dx: 2.5rem;
+		--dy: 2.8rem;
+	}
+	.spark:nth-child(5) {
+		top: 50%;
+		left: 50%;
+		--dx: -3.5rem;
+		--dy: 1rem;
+	}
+	.spark:nth-child(6) {
+		top: 50%;
+		left: 50%;
+		--dx: 1rem;
+		--dy: -3rem;
+	}
+
+	.spark.delay-1 {
+		animation-delay: 0.3s;
+	}
+	.spark.delay-2 {
+		animation-delay: 0.6s;
+	}
+	.spark.delay-3 {
+		animation-delay: 0.9s;
+	}
+
+	@keyframes burst {
+		0% {
+			transform: translate(0, 0) scale(0);
+			opacity: 0;
+		}
+		20% {
+			opacity: 1;
+			transform: translate(calc(var(--dx) * 0.3), calc(var(--dy) * 0.3)) scale(1);
+		}
+		100% {
+			transform: translate(var(--dx), var(--dy)) scale(0);
+			opacity: 0;
 		}
 	}
 
