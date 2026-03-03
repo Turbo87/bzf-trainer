@@ -1,5 +1,5 @@
 import { page } from 'vitest/browser';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import Page from './+page.svelte';
 import { SIGNALS } from '$lib/signals';
@@ -8,6 +8,10 @@ const ALL_MEANINGS = SIGNALS.map((s) => s.meaning);
 const ALL_LABELS = [...new Set(SIGNALS.map((s) => s.label))];
 
 describe('/+page.svelte', () => {
+	afterEach(() => {
+		document.cookie = 'highscore=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+	});
+
 	it('shows a signal label or meaning as heading', async () => {
 		render(Page);
 
@@ -129,6 +133,43 @@ describe('/+page.svelte', () => {
 		let correctCount = Number(correct.element().textContent);
 		let incorrectCount = Number(incorrect.element().textContent);
 		expect(correctCount + incorrectCount).toBe(2);
+	});
+
+	it('shows highscore starting at 0 when no cookie exists', async () => {
+		render(Page);
+
+		let highscore = page.getByTestId('highscore');
+		await expect.element(highscore).toBeInTheDocument();
+		expect(highscore.element().textContent).toBe('0');
+	});
+
+	it('reads highscore from cookie', async () => {
+		document.cookie = 'highscore=5';
+		render(Page);
+
+		let highscore = page.getByTestId('highscore');
+		await expect.element(highscore).toBeInTheDocument();
+		expect(highscore.element().textContent).toBe('5');
+	});
+
+	it('updates highscore when correct answers exceed it', async () => {
+		render(Page);
+
+		let firstButton = page.getByRole('button').first();
+		await expect.element(firstButton).toBeInTheDocument();
+		await firstButton.click();
+
+		let result = page.getByTestId('result');
+		await expect.element(result).toBeInTheDocument();
+		let wasCorrect = result.element().textContent!.includes('Richtig');
+
+		let highscore = page.getByTestId('highscore');
+		if (wasCorrect) {
+			expect(highscore.element().textContent).toBe('1');
+			expect(document.cookie).toContain('highscore=1');
+		} else {
+			expect(highscore.element().textContent).toBe('0');
+		}
 	});
 
 	it('shows a new question after clicking "Weiter"', async () => {

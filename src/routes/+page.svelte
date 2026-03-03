@@ -3,15 +3,29 @@
 	import SignalDisplay from '$lib/SignalDisplay.svelte';
 	import type { Signal } from '$lib/signals';
 
+	function readHighscore(): number {
+		let match = document.cookie.match(/(?:^|;\s*)highscore=(\d+)/);
+		return match ? Number(match[1]) : 0;
+	}
+
+	function writeHighscore(value: number) {
+		document.cookie = `highscore=${value}; max-age=${60 * 60 * 24 * 365}; path=/`;
+	}
+
 	let question: Question = $state(generateQuestion());
 	let selectedAnswer: Signal | string | null = $state(null);
 	let correct: number = $state(0);
 	let incorrect: number = $state(0);
+	let highscore: number = $state(readHighscore());
 
 	function select(answer: Signal | string) {
 		selectedAnswer = answer;
 		if (checkAnswer()) {
 			correct++;
+			if (correct > highscore) {
+				highscore = correct;
+				writeHighscore(highscore);
+			}
 		} else {
 			incorrect++;
 		}
@@ -40,6 +54,7 @@
 	<div class="score">
 		<span class="score-correct">✓ <span data-testid="score-correct">{correct}</span></span>
 		<span class="score-incorrect">✗ <span data-testid="score-incorrect">{incorrect}</span></span>
+		<span class="score-highscore">★ <span data-testid="highscore">{highscore}</span></span>
 	</div>
 
 	<span class="situation-badge {question.signal.situation}" data-testid="situation"
@@ -118,6 +133,10 @@
 
 	.score-incorrect {
 		color: #f87171;
+	}
+
+	.score-highscore {
+		color: #fbbf24;
 	}
 
 	.situation-badge {
